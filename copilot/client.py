@@ -1,15 +1,16 @@
-"""A tiny JSON client for llama-server, using only the standard library."""
-import json
 import urllib.request
+import json
 
-
-def post(url, payload, timeout):
-    request = urllib.request.Request(
-        url, data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        return json.loads(response.read())
-
-
-def get(url, timeout=5):
-    with urllib.request.urlopen(url, timeout=timeout) as response:
-        return json.loads(response.read())
+def post(url, data, timeout=60):
+    """Sends a JSON POST request to the local llama-server and returns the parsed JSON response."""
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode('utf-8'),
+        headers={'Content-Type': 'application/json'},
+        method='POST'
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        raise RuntimeError(f"HTTP POST failed to {url}: {e}")
